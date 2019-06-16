@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MyManhuaList.Model;
 using MyManhuaLIst.Repository;
 using System;
 using System.Collections.Generic;
@@ -12,24 +13,25 @@ namespace MyManhuaList.Controllers
     public class ManhuaController : ControllerBase
     {
         [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody] string value)
+        public ActionResult<IEnumerable<Manhua>> Get()
         {
             var repository = new ManhuaRepository();
-            repository.ConnectMongoDb();
+            List<Manhua> list = repository.GetAll().ToList();
+            return Ok(list);
+        }
+        
+        [HttpGet("{name}")]
+        public ActionResult<string> Get(string name)
+        {
+            var repository = new ManhuaRepository();
+            return Ok(repository.Get(name));
+        }
+
+        [HttpPost]
+        public void Post(Manhua manhua)
+        {
+            var repository = new ManhuaRepository();
+            repository.Add(manhua);
         }
     }
 }

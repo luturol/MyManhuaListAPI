@@ -9,7 +9,7 @@ namespace MyManhuaLIst.Repository
 {
     public class ManhuaRepository
     {
-        public async void ConnectMongoDb()
+        private IMongoCollection<Manhua> ConnectMongoDb()
         {
             const string connectionString = "mongodb://localhost:27017";
 
@@ -21,7 +21,28 @@ namespace MyManhuaLIst.Repository
 
             //get mongodb collection
             var collection = database.GetCollection<Manhua>("Teste");
-            await collection.InsertOneAsync(new Manhua { Name = "Teste", Chapter = 1 });
+            return collection;
+        }
+
+        public IEnumerable<Manhua> GetAll()
+        {
+            //get mongodb collection
+            var collection = ConnectMongoDb().AsQueryable().Where(e => true).ToList();
+
+            return collection;//.Find(x => true).ToEnumerable();
+        }
+
+        public async void Add(Manhua manhua)
+        {
+            var collection = ConnectMongoDb();
+            if(collection.FindOneAndUpdate(x => x.Name == manhua.Name, Builders<Manhua>.Update.Set(e => e.Chapter, manhua.Chapter)) == null)
+                await collection.InsertOneAsync(manhua);
+        }
+         
+        public Manhua Get(string name)
+        {
+            var collection = ConnectMongoDb();
+            return collection.Find(x => x.Name == name).FirstOrDefault();
         }
     }
 }
