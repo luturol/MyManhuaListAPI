@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using MyManhuaList.Model;
 using MyManhuaLIst.Repository;
 using System;
@@ -26,8 +27,9 @@ namespace MyManhuaList.Controllers
             var repository = new ManhuaRepository();
             return Ok(repository.Get(name));
         }
-
+        
         [HttpPost]
+        [Route("add")]
         public void Post(Manhua manhua)
         {
             var repository = new ManhuaRepository();
