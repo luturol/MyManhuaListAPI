@@ -1,11 +1,12 @@
-from app import app, db, request, jsonify, generate_password_hash
+from app import app, db, request, jsonify, generate_password_hash, jwt_required, create_access_token, get_jwt_identity
 from app.models import User
 
 @app.route('/')
 def hello():
-    return 'hello'
+    return 'hello'    
 
 @app.route('/adduser')
+@jwt_required
 def add_user():
     try:
         if not request.is_json:
