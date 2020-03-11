@@ -1,5 +1,6 @@
-from app import app, db, request, jsonify, generate_password_hash, jwt_required, create_access_token, get_jwt_identity, check_password_hash
+from app import app, db, request, jsonify, generate_password_hash, jwt_required, create_access_token, get_jwt_identity, check_password_hash, Config
 from app.models import User
+import requests
 
 @app.route('/')
 def hello():
@@ -30,7 +31,6 @@ def login():
     
 
 @app.route('/adduser', methods=['POST'])
-@jwt_required
 def add_user():
     try:
         if not request.is_json:
@@ -57,10 +57,21 @@ def add_user():
 
         response = jsonify("User saved with success")
         response.status_code = 200
+        send_simple_message(email)
 
         return response
     except Exception as error:
         response = jsonify("{0}".format(str(error)))
         response.status_code = 400
         return response
-        
+
+def send_simple_message(email):    
+    domain = Config.MAILGUN_API_DOMAIN
+    email_sender = Config.MAILGUN_EMAIL_SENDER
+    api_key = Config.MAILGUN_API_KEY
+	return requests.post("https://api.mailgun.net/v3/{}/messages".format(domain), 
+    auth=("api", api_key), 
+    data={"from": email_sender, 
+          "to": [email], 
+          "subject": "Hello", 
+          "text": "Testing some Mailgun awesomness!"})
