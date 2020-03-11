@@ -1,1 +1,1 @@
-web: flask db upgrade; gunicorn shredded:app
+web: flask db upgrade; gunicorn mymanhualist:app
