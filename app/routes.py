@@ -4,7 +4,6 @@ import requests
 from flask_cors import cross_origin
 
 @app.route('/')
-@cross_origin()
 def hello():
     return 'hello'    
 
@@ -23,7 +22,8 @@ def login():
         if not user or not check_password_hash(user.password, user_login['password']):
             raise Exception('Invalid username or password')
         
-        response = jsonify({'msg': 'User logged with success', 'token': create_access_token(identity=user_login['username'])})
+        response = jsonify({'msg': 'User logged with success', 
+                            'token': create_access_token(identity=user_login['username'])})
         response.status_code = 200
         
         return response
@@ -34,6 +34,7 @@ def login():
     
 
 @app.route('/adduser', methods=['POST'])
+@cross_origin()
 def add_user():
     try:
         if not request.is_json:
