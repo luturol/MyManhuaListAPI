@@ -7,11 +7,15 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     get_jwt_identity
 )
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
+CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 
 from app import routes, models
