@@ -2,6 +2,7 @@ from app import app, db, request, jsonify, generate_password_hash, jwt_required,
 from app.models import User
 import requests
 from flask_cors import cross_origin
+from sqlalchemy import or_
 
 @app.route('/')
 def hello():
@@ -17,18 +18,19 @@ def login():
         user_login = request.get_json()
         if 'username' not in user_login or 'password' not in user_login:
             raise Exception("Request must have all the required fields")
-        
-        user = User.query.filter(User.username == user_login['username'] or User.email == user_login['username']).first()        
+        users = User.query.all()
+
+        user = User.query.filter(or_(User.username == user_login['username'], User.email == user_login['username'])).first()        
         if not user or not check_password_hash(user.password, user_login['password']):
             raise Exception('Invalid username or password')
-        
+        user_login['username']
         response = jsonify({'msg': 'User logged with success', 
                             'token': create_access_token(identity=user_login['username'])})
         response.status_code = 200
         
         return response
     except Exception as error:
-        response = jsonify("{0}".format(str(error)))
+        response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True})
         response.status_code = 400
         return response
     
@@ -59,13 +61,13 @@ def add_user():
         db.session.add(User(username=username, email=email, password=password_hash))
         db.session.commit()
 
-        response = jsonify("User saved with success")
+        response = jsonify({ 'msg': "User saved with success" })
         response.status_code = 200
         send_simple_message(email)
 
         return response
     except Exception as error:
-        response = jsonify("{0}".format(str(error)))
+        response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True })
         response.status_code = 400
         return response
 
