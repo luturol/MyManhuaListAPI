@@ -1,5 +1,5 @@
 from app import app, db, request, jsonify, generate_password_hash, jwt_required, create_access_token, get_jwt_identity, check_password_hash, Config
-from app.models import User
+from app.models import User, Manga
 import requests
 from flask_cors import cross_origin
 from sqlalchemy import or_
@@ -25,7 +25,7 @@ def login():
             raise Exception('Invalid username or password')
                 
         response = jsonify({'msg': 'User logged with success', 
-                            'token': create_access_token(identity=user_login['username']),
+                            'token': create_access_token(identity=user.username),
                             'expiration_date': (datetime.now() + Config.JWT_ACCESS_TOKEN_EXPIRES).strftime("%d/%m/%Y %H:%M:%S") })
         response.status_code = 200
         
@@ -83,3 +83,49 @@ def send_simple_message(email):
              "to": [email], 
              "subject": "Hello", 
              "text": "Testing some Mailgun awesomness!"})
+
+@app.route('/addmanga', methods=['POST'])
+@cross_origin()
+@jwt_required
+def add_manga():
+    try:
+        if not request.is_json:
+            raise Exception('Request must be in json format')
+        
+        manga = request.get_json()
+        if 'name' not in manga or 'chapter' not in manga or 'status' not in manga:
+            raise Exception('Need to send all required fields for the request')
+        
+        if not manga['name'] or not manga['chapter'] or not manga['status']:
+            raise Exception('Need to fill all required fields for the request')
+
+        username = get_jwt_identity()
+
+        db.session.add(Manga(user_id=username, name=manga['name'], chapter=manga['chapter'], state=manga['state']))
+        db.session.commit()
+
+        response = jsonify({ 'msg': 'Manga added with success'})
+        response.status_code = 200
+
+        return response        
+    except Exception as error:
+        response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True })
+        response.status_code = 400
+        return response
+
+@app.route('/getmangas', methods=['GET'])
+@cross_origin()
+@jwt_required
+def get_mangas():
+    try:
+        username = get_jwt_identity()
+        mangas = Manga.query.filter(Manga.username == username).all()
+
+        response = jsonify({ 'mangas': mangas })
+        response.status_code = 200
+        
+        return response
+    except Exception as error:
+        response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True })
+        response.status_code = 400
+        return response
