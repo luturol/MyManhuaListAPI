@@ -10,11 +10,14 @@ def client():
     db_fd, app.config['DATABASE'] = tempfile.mkstemp()
     app.config['TESTING'] = True
 
-    with app.app.test_client() as client:
-        with app.app.context():
-            app.init_db()
+    with app.test_client() as client:
+       
         yield client
     
     os.close(db_fd)
-    os.unlink(app.app.config['DATABASE'])
-    
+    os.unlink(app.config['DATABASE'])
+
+def test_hello(client):
+    response = client.get('/')
+    print(response.get_data())
+    assert b'hello' in response.get_data()
