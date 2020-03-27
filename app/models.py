@@ -18,4 +18,4 @@ class Manga(db.Model):
     state = db.Column(db.Integer)
 
     def __repr__(self):
-        return '<User {}>'.format(self.name)
+        return '<Manga {}>'.format(self.name)

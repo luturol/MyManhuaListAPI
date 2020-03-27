@@ -129,3 +129,19 @@ def get_mangas():
         response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True })
         response.status_code = 400
         return response
+    
+@app.route('/deletemangas/<id>', methods=['GET'])
+def delete_mangas(id):
+    try:
+        exist_manga = Manga.query.filter(Manga.id == id).first() is not None
+        if exist_manga:
+            db.session.delete(Manga.query.filte(Manga.id == id).first())
+            db.session.commit()
+
+            response = jsonify({ 'msg': "Deleted with success" })
+            response.status_code = 200
+            return response
+    except Exception as erro:
+        response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True })
+        response.status_code = 400
+        return response
