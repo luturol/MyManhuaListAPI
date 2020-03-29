@@ -100,8 +100,8 @@ def add_manga():
             raise Exception('Need to fill all required fields for the request')
 
         username = get_jwt_identity()
-
-        db.session.add(Manga(user_id=username, name=manga['name'], chapter=manga['chapter'], state=manga['state']))
+        user = User.query.filter(User.username == username).first()
+        db.session.add(Manga(user=username, name=manga['name'], chapter=manga['chapter'], state=manga['state']))
         db.session.commit()
 
         response = jsonify({ 'msg': 'Manga added with success'})
@@ -119,7 +119,8 @@ def add_manga():
 def get_mangas():
     try:
         username = get_jwt_identity()
-        mangas = Manga.query.filter(Manga.username == username).all()
+        user = User.query.filter(User.username == username).first()
+        mangas = Manga.query.filter(Manga.user_id == user.id).all()
 
         response = jsonify({ 'mangas': mangas })
         response.status_code = 200
