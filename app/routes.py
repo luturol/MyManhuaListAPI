@@ -72,17 +72,18 @@ def add_user():
         response.status_code = 400
         return response
 
-def send_simple_message(email):    
-    domain = Config.MAILGUN_API_DOMAIN
-    email_sender = Config.MAILGUN_EMAIL_SENDER
-    api_key = Config.MAILGUN_API_KEY
+def send_simple_message(email): 
+    if app.config["TESTING"] == False:
+        domain = Config.MAILGUN_API_DOMAIN
+        email_sender = Config.MAILGUN_EMAIL_SENDER
+        api_key = Config.MAILGUN_API_KEY
 
-    return requests.post("https://api.mailgun.net/v3/{}/messages".format(domain), 
-            auth=("api", api_key), 
-            data={"from": email_sender, 
-             "to": [email], 
-             "subject": "Hello", 
-             "text": "Testing some Mailgun awesomness!"})
+        return requests.post("https://api.mailgun.net/v3/{}/messages".format(domain), 
+                auth=("api", api_key), 
+                data={"from": email_sender, 
+                "to": [email], 
+                "subject": "Hello", 
+                "text": "Testing some Mailgun awesomness!"})
 
 @app.route('/addmanga', methods=['POST'])
 @cross_origin()
