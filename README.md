@@ -18,6 +18,12 @@ or
 pip install -e .
 ```
 
+## Running tests
+
+```bash
+pytest
+```
+
 ## Techs
 
 - Flask
