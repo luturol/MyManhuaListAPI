@@ -86,8 +86,8 @@ def send_simple_message(email):
                 "text": "Testing some Mailgun awesomness!"})
 
 @app.route('/addmanga', methods=['POST'])
-@cross_origin()
 @jwt_required
+@cross_origin()
 def add_manga():
     try:
         if not request.is_json:
@@ -115,8 +115,8 @@ def add_manga():
         return response
 
 @app.route('/getmangas', methods=['GET'])
-@cross_origin()
 @jwt_required
+@cross_origin()
 def get_mangas():
     try:
         username = get_jwt_identity()
