@@ -1,3 +1,4 @@
+import logging
 from flask import Flask, request, jsonify
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
@@ -17,5 +18,7 @@ jwt = JWTManager(app)
 CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
+log_format = '[%(asctime)s] [%(levelname)s] - %(message)s'
+logging.basicConfig(level=logging.INFO, format=log_format)
 
 from app import routes, models

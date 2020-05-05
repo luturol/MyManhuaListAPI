@@ -1,9 +1,11 @@
+import logging
 from app import app, db, request, jsonify, generate_password_hash, jwt_required, create_access_token, get_jwt_identity, check_password_hash, Config
 from app.models import User, Manga
 import requests
 from flask_cors import cross_origin
 from sqlalchemy import or_
 from datetime import datetime, timedelta
+from sqlalchemy import exc
 
 @app.route('/')
 def hello():
@@ -30,8 +32,13 @@ def login():
         response.status_code = 200
         
         return response
+    except exc.SQLAlchemyError as error:
+        logging.error(str(error))
+        response = jsonify({ 'msg': "Please open an issue in the github project to help fix it.", 'error': True})
+        response.status_code = 400
+        return response
     except Exception as error:
-        response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True})
+        response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True })
         response.status_code = 400
         return response
     
@@ -66,6 +73,11 @@ def add_user():
         response.status_code = 200
         send_simple_message(email)
 
+        return response
+    except exc.SQLAlchemyError as error:
+        logging.error(str(error))
+        response = jsonify({ 'msg': "Internal error. Please open an issue in the github project to help fix it.", 'error': True})
+        response.status_code = 400
         return response
     except Exception as error:
         response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True })
