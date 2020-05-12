@@ -3,7 +3,7 @@ from app import app, db, request, jsonify, generate_password_hash, jwt_required,
 from app.models import User, Manga
 import requests
 from flask_cors import cross_origin
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from datetime import datetime, timedelta
 from sqlalchemy import exc
 
@@ -106,10 +106,10 @@ def add_manga():
             raise Exception('Request must be in json format')
         
         manga = request.get_json()
-        if 'name' not in manga or 'chapter' not in manga or 'status' not in manga:
+        if 'name' not in manga or 'chapter' not in manga or 'state' not in manga:
             raise Exception('Need to send all required fields for the request')
         
-        if not manga['name'] or not manga['chapter'] or not manga['status']:
+        if not manga['name'] or not manga['chapter'] or not manga['state']:
             raise Exception('Need to fill all required fields for the request')
 
         username = get_jwt_identity()
@@ -145,6 +145,8 @@ def get_mangas():
         return response
     
 @app.route('/deletemangas/<id>', methods=['GET'])
+@jwt_required
+@cross_origin()
 def delete_mangas(id):
     try:
         exist_manga = Manga.query.filter(Manga.id == id).first() is not None
@@ -155,7 +157,33 @@ def delete_mangas(id):
             response = jsonify({ 'msg': "Deleted with success" })
             response.status_code = 200
             return response
-    except Exception as erro:
+    except Exception as error:
         response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True })
         response.status_code = 400
         return response
+
+@app.route('/update-chapter/', methods=['POST'])
+@jwt_required
+@cross_origin()
+def update_chapter():        
+    try:
+        if not request.is_json:
+            raise Exception('Request must be in json format')
+
+        manga_json = request.get_json()
+        if 'manga_id' in manga_json and 'chapter' in manga_json:            
+            manga = Manga.query.filter(Manga.id == manga_json['manga_id']).first()
+            if manga:
+                manga.chapter = manga_json['chapter']
+                db.commit()
+            else:
+                raise Exception('Manga or Manhua not found')
+        else:
+            raise Exception('Need to fill all required fields for the request')
+
+
+    except Exception as error:
+        response = jsonify({ 'msg': "{0}".format(str(error)), 'error': True })
+        response.status_code = 400
+        return response
+
